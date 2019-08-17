@@ -1,0 +1,9 @@
+[submodule "extern/outcome"]
+	path = extern/outcome
+	url = https://github.com/ned14/outcome.git
+[submodule "extern/doctest"]
+	path = extern/doctest
+	url = https://github.com/onqtam/doctest.git
+[submodule "extern/fmt"]
+	path = extern/fmt
+	url = https://github.com/fmtlib/fmt.git
