@@ -111,6 +111,7 @@ add_library(test_main OBJECT test/main.cpp)
 target_link_libraries(test_main doctest) # Why aren't you transitive?
 
 add_executable(test_toolbox
+	test/BitSet.cpp
 	test/FileMon.cpp
 	$<TARGET_OBJECTS:test_main>)
 target_link_libraries(test_toolbox toolbox)
