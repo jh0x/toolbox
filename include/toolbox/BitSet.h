@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <climits>
 
+#include <toolbox/BitHacks.h>
 #include <toolbox/Config.h>
 
 TOOLBOX_NAMESPACE_BEGIN
@@ -37,6 +38,7 @@ class BitSet
 public:
 	using StorageType = typename Traits::StorageType;
 	constexpr static auto kStorageTypeBits = sizeof(StorageType) * CHAR_BIT;
+	constexpr static StorageType kUsedBitsMask = (StorageType{1} << S) - 1;
 
 	constexpr BitSet() = default;
 
@@ -51,16 +53,20 @@ public:
 	}
 
 	// checks if all, any or none of the bits are set to true
-	constexpr bool all() const noexcept; // TODO
+	constexpr bool all() const noexcept {
+		return (_storage & kUsedBitsMask) == kUsedBitsMask;
+	}
 	constexpr bool any() const noexcept {
 		return !none();
 	}
 	constexpr bool none() const noexcept {
-		return !_storage;
+		return (_storage & kUsedBitsMask) == 0;
 	}
 
 	// returns the number of bits set to true
-	constexpr bool count() const noexcept; // TODO
+	constexpr size_t count() const noexcept {
+		return popcount(_storage);
+	}
 
 	// returns the size number of bits that the bitset can hold
 	constexpr size_t size() const noexcept {
@@ -69,7 +75,7 @@ public:
 
 	// sets all bits to true
 	constexpr BitSet& set() noexcept {
-		_storage = ~(StorageType{0});
+		_storage = kUsedBitsMask;
 		return *this;
 	}
 	// sets the bit to a given value
