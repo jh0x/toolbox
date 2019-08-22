@@ -2,6 +2,8 @@
 
 #include <doctest/doctest.h>
 
+#include <bitset>
+#include <random>
 #include <type_traits>
 #include <string>
 
@@ -97,7 +99,7 @@ TEST_CASE_TEMPLATE_DEFINE("Operations - part 1", T, test_id)
 	REQUIRE(b.none());
 }
 
-template<size_t S, size_t B>
+template<size_t S, size_t B = S - 1>
 struct TestTraits
 {
 	constexpr static auto kSize = S;
@@ -109,3 +111,53 @@ TEST_CASE_TEMPLATE_INVOKE(test_id, TestTraits<31, 23>);
 TEST_CASE_TEMPLATE_INVOKE(test_id, TestTraits<63, 43>);
 TEST_CASE_TEMPLATE_INVOKE(test_id, TestTraits<127, 73>);
 TEST_CASE_TEMPLATE_INVOKE(test_id, TestTraits<127, 3>);
+
+#undef DO_DIAG
+#define DO_DIAG \
+	b.format_to(diagnostic.begin()); \
+	INFO("Current state='" << diagnostic \
+			<< "' expected='" << expected.to_string() << "'");
+
+
+TEST_CASE_TEMPLATE_DEFINE("Operations - part 2", T, test_id2)
+{
+	using TestTraits = T;
+	constexpr static auto kSize = TestTraits::kSize;
+	std::bitset<kSize> expected;
+
+	auto dist = std::uniform_int_distribution<>(0,1);
+	auto eng = std::default_random_engine();
+	for(size_t i = 0; i != kSize; ++i) {
+		expected[i] = dist(eng);
+	}
+	std::string diagnostic(kSize, ' ');
+
+	t::BitSet<kSize> b;
+	DO_DIAG;
+
+	REQUIRE(b.size() == kSize);
+	REQUIRE(b.none());
+	REQUIRE(b.count() == 0);
+
+	for(size_t i = 0; i != kSize; ++i) {
+		b.set(i, expected[i]);
+	}
+	DO_DIAG;
+	for(size_t i = 0; i != kSize; ++i) {
+		REQUIRE(b[i] == expected[i]);
+	}
+
+	b.flip();
+	expected.flip();
+	DO_DIAG;
+	for(size_t i = 0; i != kSize; ++i) {
+		REQUIRE(b[i] == expected[i]);
+	}
+}
+
+TEST_CASE_TEMPLATE_INVOKE(test_id2, TestTraits<7>);
+TEST_CASE_TEMPLATE_INVOKE(test_id2, TestTraits<15>);
+TEST_CASE_TEMPLATE_INVOKE(test_id2, TestTraits<31>);
+TEST_CASE_TEMPLATE_INVOKE(test_id2, TestTraits<63>);
+TEST_CASE_TEMPLATE_INVOKE(test_id2, TestTraits<127>);
+TEST_CASE_TEMPLATE_INVOKE(test_id2, TestTraits<127>);
