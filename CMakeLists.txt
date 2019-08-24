@@ -113,6 +113,7 @@ target_link_libraries(test_main doctest) # Why aren't you transitive?
 add_executable(test_toolbox
 	test/BitSet.cpp
 	test/FileMon.cpp
+	test/String.cpp
 	$<TARGET_OBJECTS:test_main>)
 target_link_libraries(test_toolbox toolbox)
 target_link_libraries_system(test_toolbox doctest)
