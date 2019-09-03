@@ -6,11 +6,27 @@
 #include <random>
 #include <type_traits>
 #include <string>
+#include <iostream>
 
 namespace t = TOOLBOX_NAMESPACE;
 namespace td = TOOLBOX_NAMESPACE::bitsetdetail;
 
-template<typename Expected, size_t S>
+template<
+	typename Expected
+	, size_t S
+	, typename std::enable_if_t<(S <= sizeof(Expected) * CHAR_BIT), void>* = nullptr>
+auto _storageTypeTesterImpl()
+{
+	static_assert(
+			std::is_same_v<decltype(td::_findStorageType<S>()) , Expected>
+			 , "storage size check");
+	static_assert(sizeof(Expected) == sizeof(t::BitSet<S>), "BitSet size check");
+};
+
+template<
+	typename Expected
+	, size_t S
+	, typename std::enable_if_t<(S > sizeof(Expected) * CHAR_BIT), void>* = nullptr>
 auto _storageTypeTesterImpl()
 {
 	static_assert(
@@ -30,8 +46,15 @@ TEST_CASE("StorageType")
 	_storageTypeTester<uint8_t, 0>(std::make_integer_sequence<size_t, 8>{});
 	_storageTypeTester<uint16_t, 8>(std::make_integer_sequence<size_t, 8>{});
 	_storageTypeTester<uint32_t, 16>(std::make_integer_sequence<size_t, 16>{});
+	// Above means: take all bitsets with size<17..32>
+	// and check that the basic storage type matches
+
 	_storageTypeTester<uint64_t, 32>(std::make_integer_sequence<size_t, 32>{});
 	_storageTypeTester<__uint128_t, 64>(std::make_integer_sequence<size_t, 64>{});
+	_storageTypeTester<uint32_t, 1024>(std::make_integer_sequence<size_t, 32>{});
+	_storageTypeTester<uint64_t, 1024+32>(std::make_integer_sequence<size_t, 32>{});
+	_storageTypeTester<uint32_t, 1024+64>(std::make_integer_sequence<size_t, 32>{});
+	_storageTypeTester<__uint128_t, 1024+96>(std::make_integer_sequence<size_t, 32>{});
 }
 
 // It is nicer when doctest prints out some context information
@@ -146,6 +169,7 @@ TEST_CASE_TEMPLATE_DEFINE("Operations - part 2", T, test_id2)
 	for(size_t i = 0; i != kSize; ++i) {
 		REQUIRE(b[i] == expected[i]);
 	}
+	REQUIRE(b.count() == expected.count());
 
 	b.flip();
 	expected.flip();
@@ -153,11 +177,26 @@ TEST_CASE_TEMPLATE_DEFINE("Operations - part 2", T, test_id2)
 	for(size_t i = 0; i != kSize; ++i) {
 		REQUIRE(b[i] == expected[i]);
 	}
+	REQUIRE(b.count() == expected.count());
 }
 
-TEST_CASE_TEMPLATE_INVOKE(test_id2, TestTraits<7>);
-TEST_CASE_TEMPLATE_INVOKE(test_id2, TestTraits<15>);
-TEST_CASE_TEMPLATE_INVOKE(test_id2, TestTraits<31>);
-TEST_CASE_TEMPLATE_INVOKE(test_id2, TestTraits<63>);
-TEST_CASE_TEMPLATE_INVOKE(test_id2, TestTraits<127>);
-TEST_CASE_TEMPLATE_INVOKE(test_id2, TestTraits<127>);
+
+#define TEST_IT(N) \
+	TYPE_TO_STRING(TestTraits<N>); \
+	TEST_CASE_TEMPLATE_INVOKE(test_id2, TestTraits<N>);
+
+TEST_IT(7);
+TEST_IT(15);
+TEST_IT(31);
+TEST_IT(63);
+TEST_IT(127);
+TEST_IT(128);
+TEST_IT(1024);
+TEST_IT(1024+15);
+TEST_IT(1024+31);
+TEST_IT(1024+47);
+TEST_IT(1024+63);
+TEST_IT(1024+95);
+TEST_IT(1024+127);
+TEST_IT(65535);
+
