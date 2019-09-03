@@ -59,8 +59,8 @@ public:
 	}
 	//accesses specific bit
 	constexpr bool test(size_t bit) const noexcept {
-		const auto idx = _index(bit);
-		return (_storage[idx.idx] >> idx.bit) & 1;
+		const auto [idx, pos] = _index(bit);
+		return (_storage[idx] >> pos) & 1;
 	}
 
 	// checks if all, any or none of the bits are set to true
@@ -106,11 +106,11 @@ public:
 	}
 	// sets the bit to a given value
 	constexpr BitSet& set(size_t bit, bool value = true) noexcept {
-		const auto idx = _index(bit);
+		const auto [idx, pos] = _index(bit);
 		if(value) {
-			_storage[idx.idx] |= StorageType{1} << idx.bit;
+			_storage[idx] |= StorageType{1} << pos;
 		} else {
-			_storage[idx.idx] &= ~(StorageType{1} << idx.bit);
+			_storage[idx] &= ~(StorageType{1} << pos);
 		}
 		return *this;
 	}
@@ -137,8 +137,8 @@ public:
 	}
 	// toggles the values of a single bit
 	constexpr BitSet& flip(size_t bit) noexcept {
-		const auto idx = _index(bit);
-		_storage[idx.idx] ^= StorageType{1} << idx.bit;
+		const auto [idx, pos] = _index(bit);
+		_storage[idx] ^= StorageType{1} << pos;
 		return *this;
 	}
 
