@@ -38,6 +38,19 @@ public:
 	constexpr operator const char*() const {
 		return _s;
 	}
+
+	constexpr bool operator==(const StaticString<N>& o) const noexcept {
+		const char* a = _s;
+		const char* b = o._s;
+		while(*a != '\0' && *b != '\0') {
+			if(*a != *b) return false;
+			++a; ++b;
+		}
+		return *a == '\0' && *b == '\0';
+	}
+	constexpr bool operator!=(const StaticString<N>& o) const noexcept {
+		return !(*this == o);
+	}
 private:
 	char _s[N + 1]{};
 };

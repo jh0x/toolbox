@@ -27,4 +27,9 @@ TEST_CASE("StaticString")
 	for(size_t i = 0; i != s.size() + 1; ++i) {
 		REQUIRE(s[i] == expected[i]);
 	}
+
+	auto eq = t::StaticString("Test");
+	auto neq = t::StaticString("TesT");
+	REQUIRE(s == eq);
+	REQUIRE(s != neq);
 }
