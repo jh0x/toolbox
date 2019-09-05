@@ -94,7 +94,10 @@ endfunction(target_link_libraries_system)
 # Interesting things...
 ###################################################################
 
-add_library(toolbox SHARED src/toolbox/FileMon.cpp)
+add_library(toolbox SHARED
+	src/toolbox/FileMon.cpp
+	src/toolbox/Demangler.cpp
+	)
 target_include_directories(toolbox PUBLIC
 	$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
 	$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/extern/outcome/single-header>
@@ -112,6 +115,7 @@ target_link_libraries(test_main doctest) # Why aren't you transitive?
 
 add_executable(test_toolbox
 	test/BitSet.cpp
+	test/Demangler.cpp
 	test/FileMon.cpp
 	test/String.cpp
 	$<TARGET_OBJECTS:test_main>)
