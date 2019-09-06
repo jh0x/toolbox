@@ -5,6 +5,8 @@ if("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
 		"Building from within the source tree is not supported.\n")
 endif()
 
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+
 ###################################################################
 # Core project definitions
 ###################################################################
@@ -94,15 +96,19 @@ endfunction(target_link_libraries_system)
 # Interesting things...
 ###################################################################
 
+find_package(Libunwind REQUIRED)
+
 add_library(toolbox SHARED
-	src/toolbox/FileMon.cpp
+	src/toolbox/Backtrace.cpp
 	src/toolbox/Demangler.cpp
+	src/toolbox/FileMon.cpp
 	)
 target_include_directories(toolbox PUBLIC
 	$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
 	$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/extern/outcome/single-header>
 	$<INSTALL_INTERFACE:include>
 )
+target_link_libraries(toolbox PUBLIC ${LIBUNWIND_LIBRARIES})
 target_link_libraries(toolbox PRIVATE fmt::fmt-header-only)
 
 include(CTest)
